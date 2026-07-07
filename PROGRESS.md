@@ -47,7 +47,14 @@ canary appended inside a "FINAL ANSWER: ..." line (idx0/idx8/idx9), so some
 attacks that succeeded in the model's text are scored partial/miss — a
 CONSERVATIVE bias in ASR.
 
-**Next:** figures (analysis/make_figures.py); then the paper; then GitHub upload.
+**PROJECT COMPLETE.** Figures (`analysis/make_figures.py`, 6 PNGs), paper
+(`docs/paper.md`, full sequel matching paper-1 house style; every number from the
+analysis; 3/4 hypotheses falsified and reported honestly; references marked
+[VERIFY]), `README.md`, and `.github/workflows/reproduce.yml` all written.
+**Published public:** https://github.com/DhruvilShah22/poisoned-tools (author
+identity Dhruvil Shah noreply, plain commit, no AI trailer).
+
+Optional remaining polish: verify the [VERIFY] citations; paper.md -> PDF.
 
 ---
 

@@ -2,7 +2,8 @@
  "project": "poisoned-tools",
  "title": "Poisoned Tools: Prompt-Injection Robustness and Failure Anatomy of Small Open-Weight Tool Agents",
  "sequel_to": "slm-agent-eval (Quantization, Not Just Scale)",
- "current_phase": "analysis",
+ "current_phase": "done",
+ "github": "https://github.com/DhruvilShah22/poisoned-tools (public)",
  "kaggle_run": {
   "kernel": "contactshahdhruvil/poisoned-tools-core",
   "url": "https://www.kaggle.com/code/contactshahdhruvil/poisoned-tools-core",
@@ -27,10 +28,7 @@
   "kaggle-assets: kaggle/kernel/run_kernel.py (SELF-GATING: gates+pull/verify Q8 tags+timed pilot+budget-check<=22 GPU-h+full matrix, resumable), kernel-metadata.json (contactshahdhruvil/poisoned-tools-core, gpu+internet, dataset_sources=poisoned-tools-code), kaggle/stage_payload.py (staged 36 files -> kaggle/payload), kaggle/LAUNCH.md. Payload gitignored."
  ],
  "pending_steps": [
-  "BLIND KAPPA VALIDATION on real logs: python -m analysis.blind_sample --run core_v1 --per-goal 8 -> hand-label ~40 (labels.json by idx) -> python -m analysis.compare_labels (report ASR + compliance kappa); reconcile grader if needed. REQUIRED before paper numbers are final.",
-  "figures: analysis/make_figures.py (framing/placement ASR bars, scale ladder, compliance-anatomy stacked, defense ASR-reduction vs benign-tax scatter, resist^k decay). matplotlib pinned in requirements-analysis.",
-  "PAPER (Phase B): docs/paper.md matching paper-1 house style; every number from results.json; report H1-H4 outcomes incl. falsified H4 (placement) + H1 (bigger less safe); ethics/repro statements.",
-  "GITHUB upload: git init, commit (plain msgs, Dhruvil Shah noreply identity, NO AI trailer), push public repo; add reproduce.yml CI (regen tables/figs from logs).",
+  "OPTIONAL polish: verify the [VERIFY]-marked references in docs/paper.md (arXiv IDs/venues) before any submission; convert paper.md -> PDF; consider selecting real D5 members (currently D3+D4 placeholder) if re-running.",
   "analysis/analyze.py: re-grade from logs; Wilson (ASR+benign); McNemar+Holm (2 families: ASR-reduction vs D0, benign-tax vs D0); cluster-bootstrap by injection TEMPLATE; resist^k (resist^8; resist^4 common-k for 7B/ladder); compliance-anatomy tables; screen ASR-by-framing/placement; scale ladder; tables+figures.",
   "TINY PILOT: 1 model x 2 host-tasks x 2 seeds x 2 defenses end-to-end + injected configs to fire each detector once; confirm graders fire on REAL logs; fix on pilot.",
   "hand off launch instructions for full matrix; checkpoint and stop"
@@ -88,5 +86,5 @@
   "committed_core_gpu_h_est": 11,
   "seed_asymmetry": "all models 8 seeds except M3 (qwen2.5-7b-q8) = 4 seeds (1-4), top-up to 8 if quota remains"
  },
- "last_updated": "2026-07-07T03:35:00Z"
+ "last_updated": "2026-07-08T00:30:00Z"
 }
