@@ -1,0 +1,37 @@
+name: reproduce
+
+# Regenerates the world, runs every grader gate + the blind-kappa validation, and
+# re-derives all tables/figures from the committed raw logs on each push. This is
+# the "every number traces to an artifact" guarantee, mechanized. It runs NO model
+# inference (that happens on Kaggle) — only the deterministic, log-based pipeline.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt -r requirements-analysis.txt
+      - name: Regenerate world (must match committed data exactly)
+        run: |
+          python data/generate.py
+          git diff --exit-code -- data/ || (echo "generated world drifted from committed data" && exit 1)
+      - name: Grader + library gates
+        run: |
+          python -m injections.check
+          python -m grading.check_grader
+          python -m defenses.check_defenses
+          python -m grading.check_tasks
+      - name: Blind kappa validation (grader vs hand labels)
+        run: python -m analysis.compare_labels
+      - name: Re-derive tables and figures from raw logs
+        run: |
+          python analysis/analyze.py
+          python analysis/make_figures.py
