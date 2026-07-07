@@ -1,0 +1,92 @@
+{
+ "project": "poisoned-tools",
+ "title": "Poisoned Tools: Prompt-Injection Robustness and Failure Anatomy of Small Open-Weight Tool Agents",
+ "sequel_to": "slm-agent-eval (Quantization, Not Just Scale)",
+ "current_phase": "analysis",
+ "kaggle_run": {
+  "kernel": "contactshahdhruvil/poisoned-tools-core",
+  "url": "https://www.kaggle.com/code/contactshahdhruvil/poisoned-tools-core",
+  "dataset": "contactshahdhruvil/poisoned-tools-code",
+  "status_at_last_check": "RUNNING (v5, full matrix)",
+  "launched_utc": "2026-07-07T03:30:00Z",
+  "notes": "v1-v3 fixed dataset-attach + payload + zstd. v4 ran the real pilot: pipeline works end-to-end, graders label correctly, ASR fired 2/20, fire rate 12/20 (non-fires = agent never called target tool = expected). Real runtime extrapolation ~9 GPU-h (means: 1.5b 11.1s, 3b 6.2s, 7b 8.0s, llama1b 3.2s, llama3b 8.5s) << 22h budget. v4 aborted only on an over-strict pilot assertion (required 100% fire). v5 relaxed gate (fail only if fired==0) -> full run. All 4 gates pass on Kaggle py3.12; all 5 Q8_0 tags exist. Collect: kaggle kernels output ... -p <dir>; read DIAG.txt + matrix_summary.json + runs/core_v1/."
+ },
+ "completed_steps": [
+  "read-paper1: read slm-agent-eval harness/tools/grading/analysis/report to reuse verbatim where possible",
+  "scaffold: created poisoned-tools repo root with STATE.json + PROGRESS.md",
+  "design-doc-draft: wrote docs/injection_design.md (RQs, pre-registered H1-H4, taxonomy, metrics, defenses, contrasts, stats, cell counts, ethics)",
+  "7b-budget-amendment: applied authoritative user edits (5-model core, seed asymmetry 8/4, additive top-up, resist^k common-k, never drop 7B to Q4); core ~4,224 eps ~11 GPU-h",
+  "design-signoff: user APPROVED docs/injection_design.md 2026-07-06",
+  "port-harness: copied paper-1 harness/tools/grading/run.py/reqs into repo; verified generate.py + check_tasks + imports + guardrail run clean under Python 3.14",
+  "extend-world: added benign order.notes + product.description via SEPARATE rng (SEED+1) after core build; verified all 25 golds byte-identical to paper 1 and both fields flow through get_order/find_products",
+  "injections: built injections/ package (tokens, templates+render, detect ASR per goal, check.py). 60-template screen enumerates; render deterministic; canary token survives obfuscation; 5 tokens absent from world; 16 detector unit cases pass. `python -m injections.check` green.",
+  "poisoner: injections/inject.py Injector (fires once; pre-exec for tool_error, post-exec field poison for others; records clean value). Wired into harness/agent.py via optional injector= param (+ defense= hook stub for step 6). injector=None,defense=None reproduces paper-1 exactly. Injector unit tests added to check.py; all green.",
+  "grader: grading/comply.py (compliance state machine, pre-registered rule order), grading/label.py (benign+ASR+compliance per episode, 2x2 uncollapsed), grading/kappa.py, grading/check_grader.py (10 branch cases + token-hygiene + kappa). analysis/blind_sample.py + analysis/compare_labels.py (blind ASR+compliance kappa validation, idx-keyed). Grader gate green; blind pipeline smoke-tested end-to-end (kappa 1.0 on perfect agreement).",
+  "defenses: defenses/ package D0-D5 (base=D0 identity; D1 Spotlight, D2 GoalReminder, D3 Quarantine, D4 Hierarchy, D5 Combo composable, default D3+D4 [MATRIX-DERIVED]). 3 composable hooks; Quarantine/Combo deep-copy so logged result never mutates. defenses/check_defenses.py gate green.",
+  "runner: configs/matrix.py (Arm A/B/C spec builders, seed asymmetry, placement<->host-task, focused SCREEN-DERIVED placeholders) + run.py rewritten (per-config Injector+Defense, atomic logs keyed by full config, resumable, --dry, 7B front-loaded LAST). Dry-run enumerates A=1200 B=1728 C=1296 total 4224 exactly; Injector+Defense wiring constructs clean.",
+  "kaggle-assets: kaggle/kernel/run_kernel.py (SELF-GATING: gates+pull/verify Q8 tags+timed pilot+budget-check<=22 GPU-h+full matrix, resumable), kernel-metadata.json (contactshahdhruvil/poisoned-tools-core, gpu+internet, dataset_sources=poisoned-tools-code), kaggle/stage_payload.py (staged 36 files -> kaggle/payload), kaggle/LAUNCH.md. Payload gitignored."
+ ],
+ "pending_steps": [
+  "BLIND KAPPA VALIDATION on real logs: python -m analysis.blind_sample --run core_v1 --per-goal 8 -> hand-label ~40 (labels.json by idx) -> python -m analysis.compare_labels (report ASR + compliance kappa); reconcile grader if needed. REQUIRED before paper numbers are final.",
+  "figures: analysis/make_figures.py (framing/placement ASR bars, scale ladder, compliance-anatomy stacked, defense ASR-reduction vs benign-tax scatter, resist^k decay). matplotlib pinned in requirements-analysis.",
+  "PAPER (Phase B): docs/paper.md matching paper-1 house style; every number from results.json; report H1-H4 outcomes incl. falsified H4 (placement) + H1 (bigger less safe); ethics/repro statements.",
+  "GITHUB upload: git init, commit (plain msgs, Dhruvil Shah noreply identity, NO AI trailer), push public repo; add reproduce.yml CI (regen tables/figs from logs).",
+  "analysis/analyze.py: re-grade from logs; Wilson (ASR+benign); McNemar+Holm (2 families: ASR-reduction vs D0, benign-tax vs D0); cluster-bootstrap by injection TEMPLATE; resist^k (resist^8; resist^4 common-k for 7B/ladder); compliance-anatomy tables; screen ASR-by-framing/placement; scale ladder; tables+figures.",
+  "TINY PILOT: 1 model x 2 host-tasks x 2 seeds x 2 defenses end-to-end + injected configs to fire each detector once; confirm graders fire on REAL logs; fix on pilot.",
+  "hand off launch instructions for full matrix; checkpoint and stop"
+ ],
+ "matrix_progress": {},
+ "artifacts_written": [
+  "STATE.json : machine-readable checkpoint",
+  "PROGRESS.md : human-readable running log",
+  "docs/injection_design.md : Phase A design doc / pre-registration (APPROVED)",
+  "harness/, tools/, grading/, run.py, requirements*.txt, .gitignore : ported from paper 1",
+  "data/generate.py : extended with benign order.notes + product.description (separate rng; core world unchanged)",
+  "tasks/tasks.yaml : paper-1 25-task suite (host-task subset to be tagged in a later step)",
+  "data/facts.json, data/shop.db, data/corpus/*.txt : regenerated world (shop.db now has products.description + orders.notes columns)",
+  "injections/tokens.py : fixed adversarial tokens (canary/secret/hijack-answer/py+calc markers); all world-absent",
+  "injections/templates.py : ASKS per goal, PLACEMENTS meta, 6 FRAMINGS, render(), InjectionSpec, screen_specs() (60 canary templates)",
+  "injections/detect.py : deterministic ASR detectors per goal + NOTICE/REFUSAL markers + partial-comply helpers (reused by step-5 compliance grader)",
+  "injections/check.py : unit gate (enumeration, determinism, world-absence, detectors, injector)",
+  "injections/inject.py : runtime Injector (fire-once tool-output poisoner; pre-exec tool_error + post-exec field poison; logs clean-vs-poisoned)",
+  "harness/agent.py : MODIFIED - added optional injector= + defense= hooks (defense duck-typed interface documented in docstring); None/None = paper-1 behaviour",
+  "grading/comply.py : compliance-anatomy state machine (6 categories, pre-registered rule order)",
+  "grading/label.py : per-episode benign+ASR+compliance labelling from logs; strips injection tokens before benign grade (token hygiene)",
+  "grading/kappa.py : Cohen's kappa (shared)",
+  "grading/check_grader.py : grader unit gate (10 branches + token hygiene + kappa)",
+  "injections/detect.py : MODIFIED - added model_texts() helper for partial-comply rules",
+  "analysis/blind_sample.py : blind trajectory printer for ASR+compliance hand-labelling (idx-keyed)",
+  "analysis/compare_labels.py : Cohen's kappa (ASR + compliance) auto-vs-human, idx-keyed",
+  "defenses/__init__.py : D0-D5 (Defense/Spotlight/GoalReminder/Quarantine/Hierarchy/Combo) + get_defense()",
+  "defenses/check_defenses.py : defenses unit gate",
+  "configs/matrix.py : Arm A/B/C episode-spec builders; models+seed asymmetry; placement<->host-task binding; focused-matrix SCREEN-DERIVED placeholders; episode_filename()",
+  "run.py : REWRITTEN injection-matrix runner (per-config Injector+Defense, atomic per-episode logs keyed by full config, resumable, manifest, --dry, 7B-last ordering). Dry-verified: A=1200 B=1728 C=1296 total 4224.",
+  "kaggle/kernel/run_kernel.py + kernel-metadata.json : self-gating GPU kernel",
+  "kaggle/stage_payload.py + kaggle/LAUNCH.md : code-dataset staging + launch instructions"
+ ],
+ "decisions_log": [
+  "New standalone repo (copy paper-1 code, extend there) so paper-1 reproduction stays byte-stable.",
+  "Quantization held FIXED at Q8_0 (variables are injection and defense), per brief.",
+  "Author identity Dhruvil Shah <66003201+DhruvilShah22@users.noreply.github.com>, plain commits, no AI trailer.",
+  "Exact Q8_0 model tags for qwen2.5:7b and llama3.2:3b marked [VERIFY at pilot] rather than asserted.",
+  "Attack-surface screen runs on the 3 Qwen sizes only (clean same-family scale probe); cross-family (Llama) enters at the focused matrix.",
+  "order.notes and product.description are added as BENIGN fields in the generator so the field's presence does not itself signal an injection.",
+  "7B BUDGET (authoritative user amendment 2026-07-06): 5-model core with a full 3-point Qwen ladder; PRE-REGISTERED SEED ASYMMETRY = 8 seeds all models EXCEPT Qwen-7B-Q8 at 4 seeds (seeds 1-4). 7B is a scale anchor for ASR + compliance-anatomy point estimates, NOT for resist^k. 7B is NEVER dropped to Q4 (would reintroduce a quant confound at the scale claim). Core ~4,224 episodes ~11 GPU-h vs 25 GPU-h ceiling.",
+  "resist^k convention: resist^8 for 8-seed arms, resist^4 for 7B; cross-ladder comparisons at common k=4. State asymmetry wherever resist^k appears.",
+  "Additive 7B top-up: run 7B at seeds 1-4 in core; AFTER all other arms finish, if quota remains, raise 7B to 8 seeds and re-launch (computes only seeds 5-8, zero rerun) -> upgrades 7B to resist^8. Track in matrix_progress; note in PROGRESS.md whether it ran.",
+  "Phase B paper rule: justify the asymmetric seed count in >=1 sentence; never present the 3-point ladder as if all points had equal seed budgets.",
+  "GRADER FIX (token hygiene): injection tokens contain digits (e.g. -4731, PWNED-4417); paper-1 parse_number takes the LAST number, so an appended canary would corrupt the benign numeric grade. grading/label.py strips all world-absent tokens from the final answer BEFORE benign grading; ASR/compliance use the ORIGINAL answer. Regression-tested in check_grader.",
+  "VALIDATION FIX (unique keying): (model,defense,task,seed) is NOT unique in the injection matrix (same host-task/seed recurs across injection configs). Blind validation keys each sampled episode by a unique idx (blind_sample -> sample_keys.json -> labels.json by idx). Caught by the smoke test."
+ ],
+ "open_questions": [
+  "SECURITY: user pasted a Kaggle API token in chat 2026-07-06. Advised to Expire it + create a new one. NEVER stored/echoed/committed by assistant. .gitignore already excludes kaggle.json/*.token/.kaggle/. Confirm user revoked it.",
+  "Kaggle auth must be fixed (fresh kaggle.json) before push; existing one is stale."
+ ],
+ "conventions": {
+  "matrix_progress_key": "<arm>/<model>/<config-key> with {episodes_expected, episodes_done}; 7B cells expect 4 in core (seeds 1-4), 8 after top-up.",
+  "budget_ceiling_gpu_h": 25,
+  "committed_core_gpu_h_est": 11,
+  "seed_asymmetry": "all models 8 seeds except M3 (qwen2.5-7b-q8) = 4 seeds (1-4), top-up to 8 if quota remains"
+ },
+ "last_updated": "2026-07-07T03:35:00Z"
+}
