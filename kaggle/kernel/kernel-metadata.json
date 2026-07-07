@@ -1,0 +1,13 @@
+{
+  "id": "contactshahdhruvil/poisoned-tools-core",
+  "title": "poisoned-tools-core",
+  "code_file": "run_kernel.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": ["contactshahdhruvil/poisoned-tools-code"],
+  "competition_sources": [],
+  "kernel_sources": []
+}
