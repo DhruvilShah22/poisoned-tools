@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poisoned Tools — Prompt-Injection Robustness of Small Open-Weight Tool Agents</title>
+<style>
+  :root { --ink:#1a1a1a; --muted:#555; --rule:#d8d8d8; --accent:#2f6f9f; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: Georgia, "Times New Roman", serif; color: var(--ink);
+    line-height: 1.5; max-width: 46rem; margin: 2.5rem auto; padding: 0 1.25rem;
+    font-size: 16px; text-rendering: optimizeLegibility;
+  }
+  h1 { font-size: 1.7rem; line-height: 1.25; margin: 0 0 .3rem; text-align: center; }
+  .authors { text-align: center; color: var(--muted); margin: 0 0 1.6rem; }
+  h2 { font-size: 1.15rem; border-bottom: 1px solid var(--rule); padding-bottom: .2rem;
+       margin: 1.8rem 0 .6rem; }
+  h3 { font-size: 1.02rem; margin: 1.2rem 0 .3rem; }
+  p { margin: .55rem 0; text-align: justify; hyphens: auto; }
+  .abstract { background: #f7f7f5; border: 1px solid var(--rule); border-radius: 6px;
+    padding: .9rem 1.1rem; font-size: .96rem; }
+  .abstract strong { font-variant: small-caps; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .9rem; }
+  caption { caption-side: top; text-align: left; font-size: .86rem; color: var(--muted);
+    margin-bottom: .35rem; }
+  th, td { padding: .3rem .5rem; text-align: center; }
+  thead th { border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--ink); }
+  tbody tr:last-child td { border-bottom: 1.5px solid var(--ink); }
+  td:first-child, th:first-child { text-align: left; }
+  figure { margin: 1.2rem 0; text-align: center; page-break-inside: avoid; }
+  figure img { max-width: 100%; height: auto; }
+  figcaption { font-size: .84rem; color: var(--muted); text-align: left; margin-top: .35rem; }
+  ul { margin: .5rem 0; padding-left: 1.2rem; }
+  li { margin: .25rem 0; text-align: justify; }
+  .refs p { text-indent: -1.4rem; padding-left: 1.4rem; font-size: .88rem; margin: .35rem 0;
+    text-align: left; }
+  .note { background: #eef4f9; border: 1px solid #cfe0ee; border-radius: 6px;
+    padding: .6rem .9rem; font-size: .85rem; color: #234; margin-bottom: 1.4rem; }
+  code { font-family: "SFMono-Regular", Consolas, monospace; font-size: .86em; }
+  @media print {
+    body { margin: 0; max-width: none; font-size: 10.5pt; }
+    .note { display: none; }
+    h2 { page-break-after: avoid; }
+    @page { margin: 1in; }
+  }
+</style>
+</head>
+<body>
+
+<div class="note">
+  <strong>To save as PDF:</strong> press <code>Ctrl&nbsp;+&nbsp;P</code> → choose
+  <em>Save as PDF</em> → set margins to <em>Default</em>. This banner is hidden in
+  the printed output. (Figures load from the <code>figures/</code> folder next to
+  this file.)
+</div>
+
+<h1>Poisoned Tools: Prompt-Injection Robustness and Failure Anatomy of Small
+Open-Weight Tool Agents</h1>
+<p class="authors">Dhruvil Shah &nbsp;·&nbsp; Independent research &nbsp;·&nbsp; July 2026</p>
+
+<div class="abstract">
+<p><strong>Abstract.</strong> Small open-weight language models in the
+one-to-seven-billion-parameter range are the tool-using agents that most people
+can actually run for free, and they are increasingly connected to tools whose
+outputs originate in places the operator does not control. Our earlier study
+measured how these agents fail by <em>accident</em>; here we measure how they fail
+on <em>purpose</em>, when an adversary hides instructions inside the text a tool
+returns. Holding quantization fixed at 8-bit so that the result cannot be read as a
+quantization story, we vary only the injection and the defense, and we run 4,224
+seeded episodes across a five-model, six-defense matrix together with a
+sixty-template attack-surface screen. Grading is deterministic and log-based, with
+no model in the loop, and it is blind-validated against hand labels (attack-success
+&kappa;&nbsp;=&nbsp;1.00, compliance-category &kappa;&nbsp;=&nbsp;0.95). Four
+results stand out, three of them against our own pre-registered predictions. First,
+placement matters more than we expected and in the opposite direction: an
+instruction planted in a tool's <em>error message</em> is obeyed far more often
+(0.24 given exposure) than the same instruction in a search result (0.005). Second,
+larger is not safer: susceptibility rises monotonically with model size
+(0.02&nbsp;&rarr;&nbsp;0.18&nbsp;&rarr;&nbsp;0.24 across the 1.5B, 3B and 7B Qwen
+models). Third, none of the cheap training-free defenses we tested significantly
+reduces attack success, and one&mdash;a goal reminder inserted after every tool
+call&mdash;costs nineteen points of benign task utility and erases the smallest
+models' ability to work at all. Fourth, resistance is unreliable under repetition:
+the most-attacked configuration resists all eight seeded repeats only half the
+time. The harness, data, and full logs are public and reproduce in under four
+GPU-hours on a free tier or on a commodity CPU.</p>
+</div>
+
+<h2>1. Introduction</h2>
+<p>Indirect prompt injection&mdash;the trick of hiding an instruction inside
+content that a model will later read as data&mdash;has become the headline security
+concern for tool-using language-model agents (Greshake et al., 2023). The problem
+is easy to state and awkward to fix: an agent that reads a web page, a database
+record, or a tool's error string cannot, in general, tell the difference between
+information it should use and instructions it should follow. Most of the published
+work, however, studies this on frontier API models, and it tends to fall into one
+of two modes&mdash;demonstrating that an attack is possible, or ranking systems on a
+benchmark. What we found missing was a reliability-first, failure-anatomy account
+of the models people run <em>for free</em>: the quantized open-weight builds in the
+one-to-seven-billion range, measured over repeated seeded trials, with a controlled
+test of the cheapest defenses one might reach for and an honest tally of what those
+defenses cost.</p>
+
+<p>We organize the study around four questions. <strong>(RQ1)</strong> How often do
+small local agents actually comply with instructions injected into tool outputs,
+measured over repeated seeded trials rather than a single lucky or unlucky shot?
+<strong>(RQ2)</strong> What drives compliance&mdash;where the payload is placed,
+what the attacker is trying to achieve, or how the instruction is dressed up?
+<strong>(RQ3)</strong> Where in the agent's pipeline does the hijack happen, what
+does the compliance look like broken down, and does making the model bigger help or
+hurt? <strong>(RQ4)</strong> Do cheap, inference-time, training-free defenses reduce
+attack success, and what do they take away from ordinary task performance in
+return?</p>
+
+<p>Because we think pre-registration is what separates a measurement from a story,
+we wrote the hypotheses down before running the matrix, and we report them as they
+landed&mdash;including the ones that did not survive contact with the data.
+<strong>H1</strong> (attack success is high and scale-sensitive, direction open)
+came out <em>mixed</em>: the scale dependence is real but runs against the "bigger
+is safer" prior. <strong>H2</strong> (authority- and delimiter-styled injections
+beat naked commands) is <em>partly supported</em>: authority framing wins, but
+imitating system delimiters is weaker than we guessed. <strong>H3</strong>
+(defenses cut attack success at a utility cost, and at least one under-helps) is
+<em>largely wrong</em>: no defense significantly reduces attack success, and the
+utility cost is real and lopsided. <strong>H4</strong> (trusted surfaces are worse
+than error strings) is <em>wrong, and reversed</em>. We treat the failed hypotheses
+as the contribution rather than an embarrassment: each corrects an intuition that
+current practice quietly relies on.</p>
+
+<h2>2. Related work</h2>
+<p>The modern framing of indirect prompt injection is due to Greshake et al.
+(2023), who showed that instructions smuggled into retrievable content can
+compromise real LLM-integrated applications; the direct "ignore your previous
+instructions" family was catalogued earlier by Perez and Ribeiro (2022). We do not
+propose a new attack&mdash;every payload we use is a known, published class&mdash;and
+our contribution is measurement on small local agents rather than a novel exploit.
+On the benchmarking side, InjecAgent (Zhan et al., 2024) and AgentDojo (Debenedetti
+et al., 2024) evaluate tool-agent injection, largely on frontier APIs and largely
+single-shot; we differ by studying named, quantized one-to-seven-billion
+open-weight models over repeated seeded trials, attributing failures to a pipeline
+stage, and reporting a repetition-based reliability metric. On defenses,
+spotlighting and delimiting (Hines et al., 2024), the instruction hierarchy
+(Wallace et al., 2024), and structured or quarantined queries (Chen et al., 2024)
+motivate three of the six conditions we test; we implement the cheapest
+training-free instance of each and measure it under paired statistics with an
+explicit utility tax. The reliability-first, zero-paid-API testbed itself comes from
+our earlier study (Shah, 2026), which found that a deterministic guardrail can help
+or actually hurt below a capability threshold; the present paper is the
+induced-failure counterpart of that finding, and it lands on a matching null for
+injection defenses. The repeated-trial metric we adapt follows &tau;-bench (Yao et
+al., 2024). Prompt injection is also the first entry in the OWASP Top&nbsp;10 for
+LLM Applications (OWASP, 2025), which is a fair statement of why the question is
+worth measuring carefully.</p>
+
+<h2>3. Testbed and threat model</h2>
+<p>We reuse the harness from our earlier study without modification and extend it
+only where the new question demands. A deliberately small ReAct-style loop&mdash;no
+agent framework, so that prompts, logging, and determinism stay under our
+control&mdash;drives five local, deterministic tools over a model's native
+tool-calling interface: an arithmetic calculator, a keyword document search over a
+sixty-four-document synthetic policy corpus, two parameterized SQLite lookups over a
+seeded catalogue of forty products and thirty orders, and a sandboxed Python runner.
+The world is fictional (a made-up outdoor-gear retailer), which matters for grading:
+because none of the entities exist in any pre-training corpus, an answer that is not
+grounded in a tool result is detectably ungrounded rather than accidentally
+correct.</p>
+
+<p>Two additive changes give the attacker somewhere to hide. Each product row gains
+a short benign description and each order a benign notes field, both generated from a
+separate random seed so that every gold answer from the earlier study still resolves
+byte-for-byte. These are ordinary free-text fields of the kind a real catalogue or
+order record carries, and they exist whether or not an episode is attacked, so their
+mere presence never signals an injection.</p>
+
+<p><strong>Injection mechanism.</strong> At run time a poisoner writes one
+adversarial payload into one designated field of one tool's output, fires exactly
+once per episode, and logs both the clean and the poisoned field so that every
+episode records precisely what the model saw. We cross five placements (a
+search-result body, a product description, an order-notes field, a tool error
+message, and a computed output), six framings (a naked imperative; a fake
+<code>&lt;&lt;SYSTEM MESSAGE&gt;&gt;</code> marker; an appeal to a made-up security
+policy; an urgency appeal; a polite social-engineering request; and a light
+leet-style obfuscation of the command, with the payload token left intact so it can
+still be detected), and two positions (before or after the benign content).</p>
+
+<p><strong>Goals and exact detection.</strong> Every attacker goal is scored by a
+token that cannot occur anywhere in the world&mdash;we assert its absence from the
+corpus and database before any run&mdash;so a hit is unambiguous. The goals are:
+append a fixed canary codeword; surface a planted secret token (a stand-in for data
+exfiltration); actually emit a calculator or Python call carrying an inert marker;
+answer a planted hijack question instead of the user's; and induce a refusal of a
+legitimate request. Nothing harmful ever runs: the unauthorized-call detector fires
+on the attempt, so the payload is a harmless marker, and the Python runner remains
+sandboxed (subprocess, no network, five-second timeout).</p>
+
+<p><strong>Grading.</strong> We score three axes that we are careful never to
+average together. Attack success asks whether the injected goal was achieved.
+Benign task success asks whether the agent still did its real job; because the
+injection tokens contain digits, and the original numeric grader keys on the last
+number in an answer, we grade benign success on a token-stripped copy of the answer
+so that an appended canary cannot masquerade as the result. And a
+compliance-anatomy label&mdash;<code>blind_comply</code>,
+<code>notice_then_comply</code>, <code>partial_comply</code>,
+<code>ignore_continue</code>, <code>refuse_task</code>, or
+<code>derailed</code>&mdash;is assigned by deterministic rules over the logged event
+stream. There is no model in the grading loop anywhere. We validated the grader by
+printing thirty-nine stratified trajectories with the classifier's output hidden and
+labelling them by hand: agreement was thirty-nine of thirty-nine on attack success
+(&kappa;&nbsp;=&nbsp;1.00) and thirty-eight of thirty-nine on the compliance
+category (&kappa;&nbsp;=&nbsp;0.95). The single disagreement is instructive rather
+than alarming&mdash;a model echoed a poisoned document verbatim, which happens to
+contain the canary text, with no apparent intent to comply.</p>
+
+<h2>4. Experimental design</h2>
+<p>Quantization is fixed at 8-bit for every model; the manipulated variables are the
+injection and the defense. The models are the Qwen2.5-Instruct family at 1.5B, 3B
+and 7B&mdash;a clean same-family scale ladder&mdash;plus Llama-3.2 at 1B and 3B for
+cross-family generalization, with digests pinned in the run manifest. One
+pre-registered asymmetry is worth flagging: every model runs eight seeds per
+configuration except the 7B Qwen model, which runs four. The 7B model is included as
+a scale anchor for point estimates, not for the repetition analysis, and we
+deliberately do not drop it to a lower precision to save compute, because that would
+smuggle a quantization confound back in at exactly the point where we make the scale
+claim. Wherever the repetition metric appears we report it at k&nbsp;=&nbsp;8 for the
+eight-seed models and at k&nbsp;=&nbsp;4 for the 7B anchor, and we never present the
+three-point ladder as though all three points carried the same seed budget.</p>
+
+<p>The matrix has three arms and 4,224 episodes in total. <em>Arm A</em>, an
+attack-surface screen, fixes the goal to the canary and sweeps all sixty
+placement-by-framing-by-position templates across the three Qwen sizes with no
+defense (1,200 episodes). <em>Arm B</em>, the focused matrix, takes the two most
+safety-relevant goals&mdash;an unauthorized tool call and a data leak&mdash;and the
+two strongest framings from the screen, and crosses them with all five models and
+all six defenses (1,728 episodes). <em>Arm C</em>, a benign control, runs the host
+tasks with no injection, so that we can measure what each defense costs before any
+attacker is in the picture (1,296 episodes). Sampling uses a temperature of 0.7 and
+a context window of 4,096 tokens, with at most ten model calls per episode. The whole
+matrix ran in 235 minutes&mdash;about 3.9 GPU-hours&mdash;on a free P100.</p>
+
+<p>The defenses are six training-free, inference-time wrappers. <strong>D0</strong>
+is the undefended baseline. <strong>D1</strong> (spotlighting) wraps every tool
+result in typed markers with a standing instruction that anything between them is
+data. <strong>D2</strong> (the "sandwich") restates the user's request after every
+tool observation. <strong>D3</strong> (quarantine) strips the free-text fields an
+attacker would use and fences the rest as inert. <strong>D4</strong> sets an explicit
+instruction hierarchy in the system prompt. <strong>D5</strong> combines the two most
+promising of the others. We pre-registered two families of paired contrasts: each of
+D1&ndash;D5 against D0 on attack success in the focused matrix, and each of
+D1&ndash;D5 against D0 on benign success in the control. Both use an exact McNemar
+test on paired outcomes, Holm-corrected within the family, with risk differences and
+a cluster-bootstrap 95% confidence interval (ten thousand resamples), clustered by
+injection template for the attack family and by task for the utility family.
+Per-cell uncertainty is a Wilson interval. Attack success in the screen and focused
+cells is reported given exposure&mdash;over episodes in which the agent actually
+called the poisoned tool&mdash;with the exposure rate reported alongside; the defense
+contrasts use the unconditional paired outcomes.</p>
+
+<h2>5. Results</h2>
+
+<h3>5.1 Where and how injections land (RQ2; H2, H4)</h3>
+<p>The clearest single result concerns placement, and it is the opposite of what we
+predicted. We had assumed instructions arriving through surfaces the agent
+implicitly trusts&mdash;the policy corpus, product fields&mdash;would be obeyed more
+readily than instructions in a tool's error string. Table&nbsp;1 and Figure&nbsp;1
+say otherwise.</p>
+
+<table>
+<caption><strong>Table 1.</strong> Attack success by placement (canary screen,
+given exposure). Injections in error strings are obeyed roughly fifty times as
+often as the same injection in a search body.</caption>
+<thead><tr><th>placement</th><th>success (given exposure)</th><th>95% CI</th><th>exposure rate</th></tr></thead>
+<tbody>
+<tr><td>tool error</td><td><strong>0.237</strong></td><td>0.186&ndash;0.296</td><td>0.95</td></tr>
+<tr><td>product description</td><td>0.158</td><td>0.118&ndash;0.210</td><td>1.00</td></tr>
+<tr><td>order notes</td><td>0.136</td><td>0.098&ndash;0.187</td><td>0.95</td></tr>
+<tr><td>computed output</td><td>0.045</td><td>0.022&ndash;0.090</td><td>0.65</td></tr>
+<tr><td>search body</td><td><strong>0.005</strong></td><td>0.001&ndash;0.026</td><td>0.90</td></tr>
+</tbody>
+</table>
+
+<figure>
+<img src="figures/fig1_placement.png" alt="ASR by placement">
+<figcaption><strong>Figure 1.</strong> Attack success by placement, with Wilson
+intervals. The neglected surfaces&mdash;error strings and computed outputs&mdash;are
+the dangerous ones.</figcaption>
+</figure>
+
+<p>An instruction embedded in an error message is about fifty times more likely to
+be obeyed than the same instruction sitting in a retrieved document. The most
+plausible reading is that an error string arrives as a short, imperative,
+system-sounding signal the agent treats as actionable state, whereas a search body
+arrives as retrieved prose the agent is summarizing rather than executing. Whatever
+the mechanism, the practical lesson inverts the usual advice to harden the retrieval
+corpus: the surfaces that get the least defensive attention&mdash;error strings,
+computed results&mdash;are precisely where a small agent is most steerable.</p>
+
+<p>Framing tells a softer version of the same story about tone. Authority appeals
+are the most effective framing (0.197, CI 0.145&ndash;0.261) and naked imperatives
+the least (0.040, CI 0.019&ndash;0.079), which supports the "authority beats a bare
+command" half of H2 (Figure&nbsp;2). But imitating system delimiters with a fake
+<code>&lt;&lt;SYSTEM MESSAGE&gt;&gt;</code> marker lands only in the middle (0.107),
+below even a polite request (0.173). Small models, it seems, are moved more by the
+tone of an instruction than by structural spoofing.</p>
+
+<figure>
+<img src="figures/fig2_framing.png" alt="ASR by framing">
+<figcaption><strong>Figure 2.</strong> Attack success by framing. Authority and
+politeness outperform a naked command or a fake system marker.</figcaption>
+</figure>
+
+<h3>5.2 Scale makes it worse (RQ3; H1)</h3>
+<p>Across the same-family Qwen ladder, canary success given exposure climbs
+monotonically with model size: 0.020 at 1.5B, 0.179 at 3B, and 0.236 at 7B
+(Figure&nbsp;3). The comfortable "bigger is safer" prior is simply wrong here; what
+the data show is the tension we had flagged as an open possibility, that a model
+good at following instructions is, for that very reason, good at following injected
+instructions. We had privately guessed the relationship might be non-monotone; it is
+not, which makes the message starker. Holding quantization fixed and scaling
+capability up buys more susceptibility, not less.</p>
+
+<figure>
+<img src="figures/fig3_scale.png" alt="ASR by model size">
+<figcaption><strong>Figure 3.</strong> Canary attack success rises monotonically
+with Qwen model size (given exposure), with Wilson intervals.</figcaption>
+</figure>
+
+<h3>5.3 The pointed attacks land on capable models (RQ1, RQ3)</h3>
+<p>On the two safety-relevant goals in the focused matrix, undefended success given
+exposure reaches 0.481 for the 3B Qwen model and 0.375 for the 7B, but sits near
+zero for both Llama models and for the 1.5B Qwen. The near-zero figures are
+incapacity rather than robustness: the small models mostly fail to emit a well-formed
+unauthorized call or to reproduce the secret at all, so they never get the chance to
+be exploited. The compliance anatomy (Figure&nbsp;4) makes the split
+visible&mdash;capable models tend to comply blindly, small models to ignore the
+attack or derail into loops&mdash;and where an attack does land it is overwhelmingly
+blind compliance: the agent obeys with no sign it noticed the instruction was
+foreign. Cases where a model flags the injection and then complies anyway are
+rare.</p>
+
+<figure>
+<img src="figures/fig5_compliance.png" alt="Compliance anatomy by model">
+<figcaption><strong>Figure 4.</strong> Compliance anatomy by model in the focused
+matrix. Compliance, where it happens, is almost entirely blind.</figcaption>
+</figure>
+
+<h3>5.4 Defenses: no significant reduction, and a real tax (RQ4; H3)</h3>
+<p>This is the result we least wanted and most believe. Table&nbsp;2 gives both
+pre-registered families side by side.</p>
+
+<table>
+<caption><strong>Table 2.</strong> Defense effects, paired and Holm-corrected.
+Left: change in attack success versus D0 in the focused matrix (negative is safer).
+Right: change in benign task success versus D0 in the control (negative is a utility
+tax).</caption>
+<thead><tr><th>defense</th><th>&Delta; attack success</th><th>Holm p</th><th>&Delta; benign utility</th><th>Holm p</th></tr></thead>
+<tbody>
+<tr><td>D1 spotlight</td><td>+0.024</td><td>0.36</td><td>&minus;0.051</td><td>0.63</td></tr>
+<tr><td>D2 goal-reminder</td><td>&minus;0.056</td><td>0.10</td><td><strong>&minus;0.194</strong></td><td><strong>&approx;0</strong></td></tr>
+<tr><td>D3 quarantine</td><td>+0.021</td><td>0.48</td><td>&minus;0.093</td><td>0.06</td></tr>
+<tr><td>D4 hierarchy</td><td>&minus;0.038</td><td>0.10</td><td>&minus;0.028</td><td>0.63</td></tr>
+<tr><td>D5 combo</td><td>&minus;0.004</td><td>1.00</td><td>&minus;0.046</td><td>0.63</td></tr>
+</tbody>
+</table>
+
+<p>No defense significantly reduces attack success once we correct for multiple
+comparisons. The goal reminder (D2) and the instruction hierarchy (D4) trend
+helpful, but at a Holm-corrected p&nbsp;&approx;&nbsp;0.10 neither clears the bar;
+spotlighting (D1) and quarantine (D3) actually trend slightly harmful. This is the
+induced-failure echo of what we found for accidental failure in the earlier study:
+a cheap, model-free, training-free wrapper does not reliably protect a small
+agent.</p>
+
+<p>The utility side is where the picture turns sharp. The goal
+reminder&mdash;restating the user's request after every single tool
+observation&mdash;costs nineteen points of benign task success (p&nbsp;&approx;&nbsp;0)
+and drives both Llama models from a working baseline to zero: the repeated reminders
+push the small models into loops and malformed calls, which we can watch happening in
+the logs. Quarantine also taxes utility, by about nine points. The trade-off is laid
+out in Figure&nbsp;5, and it is not encouraging: the only defense with a near-zero
+tax and a helpful trend is D4, a single standing sentence in the system prompt, and
+even that is not significant. There is no free lunch here, and barely a paid
+one.</p>
+
+<figure>
+<img src="figures/fig4_defense_tradeoff.png" alt="Defense trade-off scatter">
+<figcaption><strong>Figure 5.</strong> The defense trade-off: change in attack
+success (left is safer) against change in benign utility (down is costlier). D2 buys
+little safety at a steep cost; D4 is the least bad.</figcaption>
+</figure>
+
+<h3>5.5 Resistance decays under repetition (RQ1)</h3>
+<p>Finally, a single-shot number flatters a small agent. The repetition
+metric&mdash;the probability that an agent resists on all k seeded repeats of a
+configuration&mdash;falls quickly with k (Figure&nbsp;6). For the most-attacked
+cell, the 3B Qwen model on the pointed goals, it is 0.50 at k&nbsp;=&nbsp;8 with no
+defense: even a configuration that looks like it resists fails at least once in eight
+tries about half the time. The defenses do not repair this (0.25 for quarantine and
+for the combination). Anyone quoting a single-shot attack-success number is, in
+effect, quoting the best of several rolls.</p>
+
+<figure>
+<img src="figures/fig6_resist.png" alt="Resistance decay">
+<figcaption><strong>Figure 6.</strong> Resistance decays with the number of seeded
+repeats for the 3B Qwen model; defenses do not arrest the decline.</figcaption>
+</figure>
+
+<h2>6. Discussion</h2>
+<p>Three practical readings follow. For practitioners, the message is to guard the
+unglamorous surfaces: tool-error strings and computed outputs, not the retrieval
+corpus, are where a small agent is most easily steered, and they are exactly the
+surfaces that content filters tend to skip. For people building systems, capability
+and safety have to be budgeted separately&mdash;scaling the model up at fixed
+precision made injection easier in every case we measured&mdash;and the
+wrap-the-prompt defenses that are easy to reach for did not deliver; the goal
+reminder in particular was actively harmful to small-model utility. For evaluators,
+the takeaway is procedural: report attack success over repeated seeds, and always
+pair it with a utility tax measured on clean tasks, because a defense that shaves a
+few points off attack success while destroying a fifth of task success is not a
+defense worth shipping.</p>
+
+<h2>7. Limitations</h2>
+<p>The world is synthetic and single-domain, so the specific numbers may not
+transfer; the template-clustered bootstrap mitigates but cannot remove sensitivity
+to how the task suite is composed. Our attack-success figures are, if anything,
+conservative: the harness's final-answer extractor can truncate a canary that a
+model appended inside a "FINAL ANSWER:" line, so a handful of attacks that succeeded
+in the model's raw text are scored as partial or missed. Conditioning attack success
+on exposure means cells where the agent rarely calls the poisoned tool rest on
+smaller samples; we report exposure rates throughout and use unconditional paired
+outcomes for the contrasts to keep the inference honest. We tested a single instance
+of each defense&mdash;different wording, tighter budgets, or in-context repair
+examples might behave differently. The 7B model runs at four seeds for budget
+reasons, so it anchors point estimates rather than the repetition metric. Finally,
+the grader, though blind-validated at &kappa;&nbsp;=&nbsp;1.00 and 0.95 over
+thirty-nine episodes, can still err on unusual phrasings.</p>
+
+<h2>8. Conclusion</h2>
+<p>Holding quantization fixed and varying only the injection and the defense, we
+find that small open-weight tool agents are induced to obey planted instructions
+most easily through error strings, more readily as they grow larger, and not
+meaningfully less under any cheap training-free defense we tried&mdash;one of which
+halves small-model utility for no significant safety gain. The three comfortable
+intuitions we started with (guard the corpus, bigger is safer, a reminder can only
+help) are each wrong in this setting. The testbed, the data, and the full logs are
+public and rerun in under four GPU-hours at no cost, and we hope the negative
+results are as useful to someone deploying one of these agents as a positive one
+would have been.</p>
+
+<h2>Reproducibility statement</h2>
+<p>Every table and figure regenerates from the committed raw logs: regenerate the
+deterministic world, run the four grader gates and the blind-&kappa; comparison,
+then re-derive the tables and figures. Model digests are pinned in the run manifest;
+a continuous-integration workflow re-runs the deterministic pipeline on every push.
+The full study runs in roughly four GPU-hours on a free tier or on a commodity CPU,
+and no paid API was used at any point.</p>
+
+<h2>Ethics and scope statement</h2>
+<p>This is defensive security-evaluation research carried out entirely inside a
+self-contained synthetic sandbox. Every attack is a known, previously published
+class of prompt injection; we contribute no new exploit and target no real system,
+product, or provider. The "secret" that can be leaked is a token we invented; the
+"unauthorized tool calls" carry inert markers and the detector fires on the attempt,
+so nothing harmful executes, and the Python runner stays sandboxed. All models are
+open-weight and run locally, and no third-party service is contacted or attacked.
+The aim is to give practitioners and evaluators an honest, reproducible measurement
+of how susceptible small local agents are and how little cheap defenses actually
+help&mdash;reported, deliberately, including the parts that went against our own
+hypotheses.</p>
+
+<h2>References</h2>
+<div class="refs">
+<p>Chen, S., Piet, J., Sitawarin, C., &amp; Wagner, D. (2024). StruQ: Defending
+Against Prompt Injection with Structured Queries. USENIX Security 2025.
+arXiv:2402.06363.</p>
+<p>Debenedetti, E., Zhang, J., Balunovi&cacute;, M., Beurer-Kellner, L., Fischer, M.,
+&amp; Tram&egrave;r, F. (2024). AgentDojo: A Dynamic Environment to Evaluate Prompt
+Injection Attacks and Defenses for LLM Agents. arXiv:2406.13352.</p>
+<p>Greshake, K., Abdelnabi, S., Mishra, S., Endres, C., Holz, T., &amp; Fritz, M.
+(2023). Not What You've Signed Up For: Compromising Real-World LLM-Integrated
+Applications with Indirect Prompt Injection. arXiv:2302.12173.</p>
+<p>Hines, K., Lopez, G., Hall, M., Zarfati, F., Zunger, Y., &amp; Kiciman, E. (2024).
+Defending Against Indirect Prompt Injection Attacks With Spotlighting.
+arXiv:2403.14720.</p>
+<p>OWASP (2025). OWASP Top 10 for LLM Applications &mdash; LLM01: Prompt
+Injection.</p>
+<p>Perez, F., &amp; Ribeiro, I. (2022). Ignore Previous Prompt: Attack Techniques for
+Language Models. arXiv:2211.09527.</p>
+<p>Shah, D. (2026). Quantization, Not Just Scale: Reliability and Failure Anatomy of
+Small Open-Weight Tool Agents. (Author's prior work.)</p>
+<p>Wallace, E., Xiao, K., Leike, R., Weng, L., Heidecke, J., &amp; Beutel, A. (2024).
+The Instruction Hierarchy: Training LLMs to Prioritize Privileged Instructions.
+arXiv:2404.13208.</p>
+<p>Yao, S., Shinn, N., Razavi, P., &amp; Narasimhan, K. (2024). &tau;-bench: A
+Benchmark for Tool-Agent-User Interaction in Real-World Domains. arXiv:2406.12045.</p>
+<p>Zhan, Q., Liang, Z., Ying, Z., &amp; Kang, D. (2024). InjecAgent: Benchmarking
+Indirect Prompt Injections in Tool-Integrated Large Language Model Agents. Findings
+of ACL 2024. arXiv:2403.02691.</p>
+</div>
+
+</body>
+</html>
