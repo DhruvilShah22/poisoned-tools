@@ -95,8 +95,7 @@ measure it under paired statistics with an explicit benign-utility tax. **Small
 open-weight agents.** *Prior work* established the reliability-first,
 zero-paid-API testbed we reuse and found that a deterministic guardrail can help
 or hurt below a capability threshold; the present paper is its induced-failure
-analogue and finds a matching null for injection defenses. *(All arXiv IDs and
-venues in the reference list are marked [VERIFY] pending a citation pass.)*
+analogue and finds a matching null for injection defenses.
 
 ## 3. Testbed
 
@@ -337,17 +336,16 @@ own hypotheses.
 
 ## References
 
-*All references below are marked **[VERIFY]** — arXiv IDs, venues, and author
-lists must be confirmed in a citation pass before submission; none should be
-relied upon as stated.*
+*arXiv identifiers, titles, and author lists below were verified against arXiv on
+2026-07-08. The first entry is self-cited prior work.*
 
-- Shah, 2026. Quantization, Not Just Scale: Reliability and Failure Anatomy of Small Open-Weight Tool Agents. *(own prior work)* [VERIFY]
-- Greshake et al., 2023. Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection. arXiv:2302.12173 [VERIFY]
-- Perez & Ribeiro, 2022. Ignore Previous Prompt: Attack Techniques for Language Models. arXiv:2211.09527 [VERIFY]
-- Zhan et al., 2024. InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated LLM Agents. arXiv:2403.02691 [VERIFY]
-- Debenedetti et al., 2024. AgentDojo: A Dynamic Environment to Evaluate Attacks and Defenses for LLM Agents. arXiv:2406.13352 [VERIFY]
-- Hines et al., 2024. Defending Against Indirect Prompt Injection Attacks With Spotlighting. arXiv:2403.14720 [VERIFY]
-- Wallace et al., 2024. The Instruction Hierarchy: Training LLMs to Prioritize Privileged Instructions. arXiv:2404.13208 [VERIFY]
-- Chen et al., 2024. StruQ: Defending Against Prompt Injection with Structured Queries. arXiv:2402.06363 [VERIFY]
-- OWASP, 2025. OWASP Top 10 for LLM Applications — LLM01 Prompt Injection. [VERIFY]
-- Yao et al., 2024. τ-bench: A Benchmark for Tool-Agent-User Interaction. arXiv:2406.12045 [VERIFY]
+- Shah, 2026. Quantization, Not Just Scale: Reliability and Failure Anatomy of Small Open-Weight Tool Agents. *(own prior work.)*
+- Greshake, Abdelnabi, Mishra, Endres, Holz & Fritz, 2023. Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection. arXiv:2302.12173.
+- Perez & Ribeiro, 2022. Ignore Previous Prompt: Attack Techniques for Language Models. arXiv:2211.09527.
+- Zhan, Liang, Ying & Kang, 2024. InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated Large Language Model Agents. Findings of ACL 2024; arXiv:2403.02691.
+- Debenedetti, Zhang, Balunović, Beurer-Kellner, Fischer & Tramèr, 2024. AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents. arXiv:2406.13352.
+- Hines, Lopez, Hall, Zarfati, Zunger & Kiciman, 2024. Defending Against Indirect Prompt Injection Attacks With Spotlighting. arXiv:2403.14720.
+- Wallace, Xiao, Leike, Weng, Heidecke & Beutel, 2024. The Instruction Hierarchy: Training LLMs to Prioritize Privileged Instructions. arXiv:2404.13208.
+- Chen, Piet, Sitawarin & Wagner, 2024. StruQ: Defending Against Prompt Injection with Structured Queries. USENIX Security 2025; arXiv:2402.06363.
+- Yao, Shinn, Razavi & Narasimhan, 2024. τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains. arXiv:2406.12045.
+- OWASP, 2025. OWASP Top 10 for LLM Applications — LLM01: Prompt Injection.
