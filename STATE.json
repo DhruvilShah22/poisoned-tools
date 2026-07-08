@@ -28,7 +28,8 @@
   "kaggle-assets: kaggle/kernel/run_kernel.py (SELF-GATING: gates+pull/verify Q8 tags+timed pilot+budget-check<=22 GPU-h+full matrix, resumable), kernel-metadata.json (contactshahdhruvil/poisoned-tools-core, gpu+internet, dataset_sources=poisoned-tools-code), kaggle/stage_payload.py (staged 36 files -> kaggle/payload), kaggle/LAUNCH.md. Payload gitignored."
  ],
  "pending_steps": [
-  "OPTIONAL polish: verify the [VERIFY]-marked references in docs/paper.md (arXiv IDs/venues) before any submission; convert paper.md -> PDF; consider selecting real D5 members (currently D3+D4 placeholder) if re-running.",
+  "USER ACTION only: produce the PDF -> open paper/paper.html and Ctrl+P Save-as-PDF (zero installs), OR upload paper/main.tex + figures/ to Overleaf and Recompile. Both formats hand-written, citations arXiv-verified.",
+  "OPTIONAL: expire the two pasted Kaggle tokens; select real D5 members (currently D3+D4 placeholder) if ever re-running.",
   "analysis/analyze.py: re-grade from logs; Wilson (ASR+benign); McNemar+Holm (2 families: ASR-reduction vs D0, benign-tax vs D0); cluster-bootstrap by injection TEMPLATE; resist^k (resist^8; resist^4 common-k for 7B/ladder); compliance-anatomy tables; screen ASR-by-framing/placement; scale ladder; tables+figures.",
   "TINY PILOT: 1 model x 2 host-tasks x 2 seeds x 2 defenses end-to-end + injected configs to fire each detector once; confirm graders fire on REAL logs; fix on pilot.",
   "hand off launch instructions for full matrix; checkpoint and stop"
