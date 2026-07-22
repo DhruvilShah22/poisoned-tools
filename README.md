@@ -22,6 +22,8 @@ intuition; **larger models obey injections more** (qwen 1.5B 0.02 → 3B 0.18 �
 "sandwich" costs **−19pp benign utility**; resistance collapses under repetition
 (qwen-3B resist⁸ = 0.50).
 
+![Attack success rate by injection placement, with 95% CIs](analysis/figures/fig1_placement.png)
+
 ## Reproducing
 
 Every number in `docs/paper.md` regenerates from the committed raw logs in
