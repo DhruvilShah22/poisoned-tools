@@ -1,4 +1,4 @@
-"""Cohen's kappa for blind-grader validation (same estimator as paper 1)."""
+"""Cohen's kappa for the grader reference-label check (same estimator as paper 1)."""
 
 from collections import Counter
 

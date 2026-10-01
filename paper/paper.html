@@ -71,8 +71,7 @@ returns. Holding quantization fixed at 8-bit so that the result cannot be read a
 quantization story, we vary only the injection and the defense, and we run 4,224
 seeded episodes across a five-model, six-defense matrix together with a
 sixty-template attack-surface screen. Grading is deterministic and log-based, with
-no model in the loop, and it is blind-validated against hand labels (attack-success
-&kappa;&nbsp;=&nbsp;1.00, compliance-category &kappa;&nbsp;=&nbsp;0.95). Four
+no model in the loop. Four
 results stand out, three of them against our own pre-registered predictions. First,
 placement matters more than we expected and in the opposite direction: an
 instruction planted in a tool's <em>error message</em> is obeyed far more often
@@ -205,13 +204,7 @@ compliance-anatomy label&mdash;<code>blind_comply</code>,
 <code>notice_then_comply</code>, <code>partial_comply</code>,
 <code>ignore_continue</code>, <code>refuse_task</code>, or
 <code>derailed</code>&mdash;is assigned by deterministic rules over the logged event
-stream. There is no model in the grading loop anywhere. We validated the grader by
-printing thirty-nine stratified trajectories with the classifier's output hidden and
-labelling them by hand: agreement was thirty-nine of thirty-nine on attack success
-(&kappa;&nbsp;=&nbsp;1.00) and thirty-eight of thirty-nine on the compliance
-category (&kappa;&nbsp;=&nbsp;0.95). The single disagreement is instructive rather
-than alarming&mdash;a model echoed a poisoned document verbatim, which happens to
-contain the canary text, with no apparent intent to comply.</p>
+stream. There is no model in the grading loop anywhere.</p>
 
 <h2>4. Experimental design</h2>
 <p>Quantization is fixed at 8-bit for every model; the manipulated variables are the
@@ -433,8 +426,7 @@ outcomes for the contrasts to keep the inference honest. We tested a single inst
 of each defense&mdash;different wording, tighter budgets, or in-context repair
 examples might behave differently. The 7B model runs at four seeds for budget
 reasons, so it anchors point estimates rather than the repetition metric. Finally,
-the grader, though blind-validated at &kappa;&nbsp;=&nbsp;1.00 and 0.95 over
-thirty-nine episodes, can still err on unusual phrasings.</p>
+the grader is rule-based and can still err on unusual phrasings.</p>
 
 <h2>8. Conclusion</h2>
 <p>Holding quantization fixed and varying only the injection and the defense, we
@@ -450,7 +442,7 @@ would have been.</p>
 
 <h2>Reproducibility statement</h2>
 <p>Every table and figure regenerates from the committed raw logs: regenerate the
-deterministic world, run the four grader gates and the blind-&kappa; comparison,
+deterministic world, run the four grader gates and the reference-label comparison,
 then re-derive the tables and figures. Model digests are pinned in the run manifest;
 a continuous-integration workflow re-runs the deterministic pipeline on every push.
 The full study runs in roughly four GPU-hours on a free tier or on a commodity CPU,

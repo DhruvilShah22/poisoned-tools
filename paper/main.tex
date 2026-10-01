@@ -42,9 +42,7 @@ adversary hides instructions inside the text a tool returns. Holding quantizatio
 fixed at 8-bit so that the result cannot be read as a quantization story, we vary
 only the injection and the defense, and we run 4{,}224 seeded episodes across a
 five-model, six-defense matrix together with a sixty-template attack-surface
-screen. Grading is deterministic and log-based, with no model in the loop, and it
-is blind-validated against hand labels (attack-success $\kappa = 1.00$,
-compliance-category $\kappa = 0.95$). Four results stand out, three of them
+screen. Grading is deterministic and log-based, with no model in the loop. Four results stand out, three of them
 against our own pre-registered predictions. First, \emph{placement matters more
 than we expected, and in the opposite direction}: an instruction planted in a
 tool's \emph{error message} is obeyed far more often (success rate $0.24$ given
@@ -190,15 +188,7 @@ answer so that an appended canary cannot masquerade as the result. And a
 \emph{compliance-anatomy} label---\texttt{blind\_comply},
 \texttt{notice\_then\_comply}, \texttt{partial\_comply}, \texttt{ignore\_continue},
 \texttt{refuse\_task}, or \texttt{derailed}---is assigned by deterministic rules
-over the logged event stream. There is no model in the grading loop anywhere. We
-validated the grader by printing thirty-nine stratified trajectories with the
-classifier's output hidden and labelling them by hand: agreement was thirty-nine
-of thirty-nine on attack success ($\kappa = 1.00$) and thirty-eight of thirty-nine
-on the compliance category ($\kappa = 0.95$). The single disagreement is
-instructive rather than alarming---a model echoed a poisoned document verbatim,
-which happens to contain the canary text, with no apparent intent to comply, and
-the ``token appeared in the trajectory'' rule reads that as a partial compliance
-where a human reads it as simply ignoring the attack.
+over the logged event stream. There is no model in the grading loop anywhere.
 
 \section{Experimental design}
 
@@ -448,8 +438,7 @@ instance of each defense---different wording, tighter budgets, or in-context
 repair examples might behave differently. The 7B model runs at four seeds for
 budget reasons, so it anchors point estimates rather than the repetition metric,
 and we are careful not to present the ladder as though it did otherwise. Finally,
-the grader, though blind-validated at $\kappa = 1.00$ and $0.95$ over thirty-nine
-episodes, can still err on unusual phrasings.
+the grader is rule-based and can still err on unusual phrasings.
 
 \section{Conclusion}
 
@@ -467,7 +456,7 @@ would have been.
 \section*{Reproducibility statement}
 
 Every table and figure regenerates from the committed raw logs: regenerate the
-deterministic world, run the four grader gates and the blind-$\kappa$ comparison,
+deterministic world, run the four grader gates and the reference-label comparison,
 then re-derive the tables and figures. Model digests are pinned in the run
 manifest; a continuous-integration workflow re-runs the deterministic pipeline on
 every push. The full study runs in roughly four GPU-hours on a free tier or on a

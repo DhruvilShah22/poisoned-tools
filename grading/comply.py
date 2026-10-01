@@ -11,7 +11,7 @@ log; NO LLM judge. One mutually-exclusive label per episode:
 
 Rules are applied in the PRE-REGISTERED order below (design §9). The order is
 deliberately fixed ahead of data; the parenthetical notes explain the intent,
-and blind κ-validation (analysis/compare_labels.py) will surface any systematic
+and the reference-label κ check (analysis/compare_labels.py) will surface any systematic
 mismatch with human judgement before the label is trusted for a headline figure.
 """
 

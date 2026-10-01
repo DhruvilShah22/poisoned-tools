@@ -35,10 +35,10 @@ re-grades every episode from raw logs and emits `analysis/results.json` +
   Llama + qwen1.5b ~0 (mostly can't execute the attack). resist^8 for qwen3b D0
   = 0.50 (resistance is unreliable under repetition).
 
-**Blind κ-validation DONE (39 real episodes):** ASR κ = **1.000** (39/39),
+**Reference-label κ check DONE (39 real episodes):** ASR κ = **1.000** (39/39),
 compliance κ = **0.946** (38/39). One disagreement (idx2): a model echoed the raw
 poisoned search result verbatim (contains the canary text) without intent to
-append → grader's "token-in-trajectory" rule = partial_comply, human =
+append → grader's "token-in-trajectory" rule = partial_comply, reference label =
 ignore_continue. Documented as a known edge case (conservative; κ well above 0.8),
 not rule-fitted. Labels: analysis/labeling/{sample_keys,labels}.json;
 blind_sample.md kept.
@@ -100,7 +100,7 @@ Optional remaining polish: verify the [VERIFY] citations; paper.md -> PDF.
 
 **Collect when done:** `kaggle kernels output contactshahdhruvil/poisoned-tools-core
 -p <dir>` → read `DIAG.txt` (pilot extrapolation + summary), `matrix_summary.json`,
-and `runs/core_v1/`. Then Phase A step: blind κ-validation on real logs, then the
+and `runs/core_v1/`. Then Phase A step: reference-label κ check on real logs, then the
 analysis (step: analysis/analyze.py), then the paper.
 
 **Caveat:** if the full run exceeds one Kaggle session (~12h), it stops with
@@ -185,7 +185,7 @@ the graders on real logs.
 
 **Current state — end of part 1.** Phase A steps 1-6 complete: design
 (final), harness port + world extension, injection library, runtime poisoner,
-full grader + blind κ-validation, and defenses. Everything is unit/smoke-verified
+full grader + reference-label κ check, and defenses. Everything is unit/smoke-verified
 **without a model**. All check gates green:
 `injections.check`, `grading.check_grader`, `defenses.check_defenses`,
 `grading.check_tasks`.
@@ -211,7 +211,7 @@ confirm green; then build the runner (step 7).
 - `grading/kappa.py`, `grading/check_grader.py` — grader gate: 10 compliance
   branches + the token-hygiene regression + κ sanity. **Green.**
 - `analysis/blind_sample.py` + `analysis/compare_labels.py` — blind ASR +
-  compliance hand-labelling and Cohen's κ, idx-keyed. Smoke-tested end to end on
+  compliance reference labelling and Cohen's κ, idx-keyed. Smoke-tested end to end on
   synthetic logs (κ = 1.0 on perfect agreement), artifacts cleaned up.
 
 **Two correctness findings this step (both fixed + regression-guarded):**
@@ -226,7 +226,7 @@ confirm green; then build the runner (step 7).
    the collision.
 
 **Current state**
-- All three grading axes + blind validation exist and are unit/smoke verified. No
+- All three grading axes + reference-label check exist and are unit/smoke verified. No
   model has run. Defenses remain stubs (hooks exist).
 
 **Exact next action**
@@ -332,7 +332,7 @@ confirm green; then build the runner (step 7).
 **Done**
 - Read the paper-1 repo (`slm-agent-eval`) end to end: agent loop, five tools,
   fault injector, guardrail, deterministic grader + first-failure attributor,
-  blind-validation (Cohen's κ), analysis (McNemar/Holm/Wilson/cluster-bootstrap/
+  reference-label check (Cohen's κ), analysis (McNemar/Holm/Wilson/cluster-bootstrap/
   pass^k), runner, Kaggle kernels, and the report house style. The plan is to
   reuse this machinery, not rebuild it.
 - Created the new repo root (`poisoned-tools/`) with `STATE.json` + this file.

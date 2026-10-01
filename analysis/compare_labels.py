@@ -1,4 +1,4 @@
-"""Compare blind hand labels against the programmatic injection grader.
+"""Compare committed reference labels against the programmatic injection grader.
 
 Recomputes ASR + compliance with the CURRENT grader (grading/label.py), not any
 value stored at run time, so this validates whatever code the analysis will use.

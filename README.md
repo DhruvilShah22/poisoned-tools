@@ -14,8 +14,8 @@ is held **fixed at Q8_0** — the variables are the injection and the defense.
 
 Complete. **Findings and paper-style write-up: [`docs/paper.md`](docs/paper.md);**
 pre-registration: [`docs/injection_design.md`](docs/injection_design.md).
-Headlines from 4,224 seeded episodes (blind-validated grading: ASR κ = 1.00,
-compliance κ = 0.95): injections in **tool-error strings** are obeyed most (ASR
+Headlines from 4,224 seeded episodes (deterministic, log-based grading; no LLM
+judge): injections in **tool-error strings** are obeyed most (ASR
 0.24) and in **search bodies** least (0.005) — the reverse of the trusted-surface
 intuition; **larger models obey injections more** (qwen 1.5B 0.02 → 3B 0.18 → 7B
 0.24); **no cheap defense significantly reduces ASR**, and a goal-reminder
@@ -36,7 +36,7 @@ python -m injections.check              # injection library + detector gate
 python -m grading.check_grader          # grader gate (branches + token hygiene)
 python -m defenses.check_defenses       # defenses gate
 python -m grading.check_tasks           # all 25 golds resolve
-python -m analysis.compare_labels       # grader vs blind hand labels (kappa)
+python -m analysis.compare_labels       # grader vs committed reference labels
 python analysis/analyze.py              # tables from logs
 python analysis/make_figures.py         # figures from logs
 ```
@@ -55,7 +55,7 @@ injections/                templates + runtime poisoner + deterministic ASR dete
 defenses/                  D0-D5 training-free inference-time defenses
 harness/                   agent loop (reused from paper 1) + injection/defense hooks
 tools/  data/  tasks/      the 5 local tools, seeded synthetic world, 25 tasks
-grading/                   ASR + compliance-anatomy + benign graders; blind kappa
+grading/                   ASR + compliance-anatomy + benign graders; kappa util
 analysis/                  analyze.py, make_figures.py, blind_sample.py, results
 run.py  configs/matrix.py  resumable runner + the three-arm matrix
 kaggle/                    self-gating GPU kernel + code-dataset staging + launch doc

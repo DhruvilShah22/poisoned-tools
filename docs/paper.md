@@ -20,8 +20,7 @@ cheap training-free defenses help — and at what cost to benign task success.
 Quantization is deliberately held fixed (Q8_0) so this is not a quantization
 sequel; the variables are the injection and the defense. We run **4,224 seeded
 episodes** across a five-model × six-defense matrix plus a 60-template
-attack-surface screen, grading programmatically (blind-validated: ASR κ = 1.00,
-compliance κ = 0.95). Four findings, three of them against our pre-registered
+attack-surface screen, grading programmatically with no LLM judge. Four findings, three of them against our pre-registered
 predictions. **(1) Placement dominates, and the trusted-surface intuition is
 backwards:** injections in *tool-error strings* achieve the highest attack
 success (ASR 0.24 given exposure), and injections in *search-result bodies* the
@@ -132,11 +131,6 @@ its real job — graded on a token-stripped answer so injected digits cannot
 corrupt the numeric grade), and a **compliance-anatomy** label per episode
 (`blind_comply`, `notice_then_comply`, `partial_comply`, `ignore_continue`,
 `refuse_task`, `derailed`) from deterministic rules over the event log.
-**Validation:** 39 stratified episodes were hand-labelled blind (trajectories
-printed without classifier output). Agreement: **39/39 on ASR (κ = 1.00)** and
-**38/39 on compliance category (κ = 0.95)**; the single disagreement is a model
-verbatim-echoing a poisoned document (which contains the token) with no intent to
-comply — the "token-in-trajectory" rule reads it as partial, a human as ignore.
 
 ## 4. Experimental design
 
@@ -295,8 +289,8 @@ points of ASR while destroying a fifth of task success is not a win.
   examples might behave differently; we tested the cheapest training-free point.
 - **7B at 4 seeds** (budget); it anchors point estimates, not resist^8. The
   scale ladder is not presented as if all points had equal seed budgets.
-- **Grader ceiling.** κ = 1.00 / 0.95 on 39 blind episodes; residual error on
-  unusual phrasings is possible.
+- **Grader ceiling.** The grader is rule-based; residual error on unusual
+  phrasings is possible.
 
 ## 8. Conclusion
 
@@ -314,7 +308,7 @@ Every table and figure regenerates from the committed raw logs
 (`runs/core_v1/`): `python data/generate.py` (deterministic world) → `python
 analysis/analyze.py` → `python analysis/make_figures.py`. Grader checks
 (`python -m injections.check`, `-m grading.check_grader`, `-m
-defenses.check_defenses`, `-m grading.check_tasks`) and the blind κ-validation
+defenses.check_defenses`, `-m grading.check_tasks`) and the reference-label check
 (`-m analysis.compare_labels`) are committed. Model digests are pinned in the run
 manifest; the full study runs in ~4 GPU-h on a free Kaggle P100 or on a consumer
 CPU. No paid API was used anywhere.

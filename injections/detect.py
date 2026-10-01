@@ -9,7 +9,7 @@ the agent obeyed the injection — tokens are absent from the benign world
 
 The compliance-anatomy grader (grading/, step 5) reuses the helper predicates
 and the NOTICE_MARKERS / REFUSAL_MARKERS lists below; those marker lists are a
-first cut and will be tightened against blind hand-labels with Cohen's kappa
+first cut and will be tightened against reference labels with Cohen's kappa
 before any headline number is trusted.
 """
 
