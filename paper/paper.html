@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Poisoned Tools — Prompt-Injection Robustness of Small Open-Weight Tool Agents</title>
+<title>Poisoned Tools: Prompt-Injection Robustness and Failure Anatomy of Small Open-Weight Tool Agents</title>
+<meta name="author" content="Dhruvil Amit Shah">
 <style>
   :root { --ink:#1a1a1a; --muted:#555; --rule:#d8d8d8; --accent:#2f6f9f; }
   * { box-sizing: border-box; }
@@ -44,6 +45,8 @@
     .note { display: none; }
     h2 { page-break-after: avoid; }
     @page { margin: 1in; }
+    figure img { max-width: 72%; }
+    figure { margin: .8rem 0; }
   }
 </style>
 </head>
@@ -58,8 +61,8 @@
 
 <h1>Poisoned Tools: Prompt-Injection Robustness and Failure Anatomy of Small
 Open-Weight Tool Agents</h1>
-<p class="authors">Dhruvil Amit Shah &nbsp;·&nbsp; Independent research &nbsp;·&nbsp; July 2026</p>
-<p class="authors" style="font-size:0.85em">Code and data: https://github.com/DhruvilShah22/poisoned-tools &nbsp;·&nbsp; License: CC BY 4.0<br>Cite as: D. A. Shah, &ldquo;Poisoned Tools: Prompt-Injection Robustness and Failure Anatomy of Small Open-Weight Tool Agents,&rdquo; Zenodo, 2026, doi:10.5281/zenodo.21349713.</p>
+<p class="authors">Dhruvil Amit Shah<br><span style="font-size:0.9em">Independent Researcher &nbsp;·&nbsp; contactshahdhruvil@gmail.com &nbsp;·&nbsp; ORCID 0009-0008-2988-5216</span></p>
+<p class="authors" style="font-size:0.85em">Preprint &nbsp;·&nbsp; July 2026, revised November 2026<br>Code and data: https://github.com/DhruvilShah22/poisoned-tools &nbsp;·&nbsp; License: CC BY 4.0<br>Cite as: D. A. Shah, &ldquo;Poisoned Tools: Prompt-Injection Robustness and Failure Anatomy of Small Open-Weight Tool Agents,&rdquo; Zenodo, 2026, doi:10.5281/zenodo.21349713.</p>
 
 <div class="abstract">
 <p><strong>Abstract.</strong> Small open-weight models, somewhere between one and seven billion parameters, are
@@ -189,9 +192,9 @@ Benign task success asks whether the agent still did its real job; because the
 injection tokens contain digits, and the original numeric grader keys on the last
 number in an answer, we grade benign success on a token-stripped copy of the answer
 so that an appended canary cannot masquerade as the result. And a
-compliance-anatomy label (<code>blind_comply</code>,
-<code>notice_then_comply</code>, <code>partial_comply</code>,
-<code>ignore_continue</code>, <code>refuse_task</code>, or
+compliance-anatomy label (<code>blind_<wbr>comply</code>,
+<code>notice_<wbr>then_<wbr>comply</code>, <code>partial_<wbr>comply</code>,
+<code>ignore_<wbr>continue</code>, <code>refuse_<wbr>task</code>, or
 <code>derailed</code>) is assigned by deterministic rules over the logged event
 stream. There is no model in the grading loop anywhere.</p>
 
@@ -456,7 +459,7 @@ Injection.</p>
 <p>Perez, F., &amp; Ribeiro, I. (2022). Ignore Previous Prompt: Attack Techniques for
 Language Models. arXiv:2211.09527.</p>
 <p>Shah, D. A. (2026). Quantization, Not Just Scale: Reliability and Failure Anatomy of
-Small Open-Weight Tool Agents. (Author's prior work.)</p>
+Small Open-Weight Tool Agents. Zenodo. doi:10.5281/zenodo.21205405.</p>
 <p>Wallace, E., Xiao, K., Leike, R., Weng, L., Heidecke, J., &amp; Beutel, A. (2024).
 The Instruction Hierarchy: Training LLMs to Prioritize Privileged Instructions.
 arXiv:2404.13208.</p>

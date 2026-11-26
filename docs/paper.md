@@ -332,7 +332,7 @@ own hypotheses.
 *arXiv identifiers, titles, and author lists below were verified against arXiv on
 2026-07-08. The first entry is self-cited prior work.*
 
-- Shah, D. A., 2026. Quantization, Not Just Scale: Reliability and Failure Anatomy of Small Open-Weight Tool Agents. *(own prior work.)*
+- Shah, D. A., 2026. Quantization, Not Just Scale: Reliability and Failure Anatomy of Small Open-Weight Tool Agents. Zenodo. doi:10.5281/zenodo.21205405.
 - Greshake, Abdelnabi, Mishra, Endres, Holz & Fritz, 2023. Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection. arXiv:2302.12173.
 - Perez & Ribeiro, 2022. Ignore Previous Prompt: Attack Techniques for Language Models. arXiv:2211.09527.
 - Zhan, Liang, Ying & Kang, 2024. InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated Large Language Model Agents. Findings of ACL 2024; arXiv:2403.02691.
