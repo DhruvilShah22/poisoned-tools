@@ -2,7 +2,7 @@
 
 **Prompt-Injection Robustness and Failure Anatomy of Small Open-Weight Tool Agents**
 
-Dhruvil Shah — July 2026. Status: **draft, under review.** No experiment
+Dhruvil Amit Shah — July 2026. Status: **draft, under review.** No experiment
 runs, and no matrix code is written, until this document is final. This is
 the pre-registration: the hypotheses, contrasts, metrics, and stopping rules
 below are fixed *before* the full matrix, and the outcomes will be reported

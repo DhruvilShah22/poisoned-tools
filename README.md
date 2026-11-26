@@ -36,7 +36,7 @@ python -m injections.check              # injection library + detector gate
 python -m grading.check_grader          # grader gate (branches + token hygiene)
 python -m defenses.check_defenses       # defenses gate
 python -m grading.check_tasks           # all 25 golds resolve
-python -m analysis.compare_labels       # grader vs committed reference labels
+python -m analysis.compare_labels       # grader check
 python analysis/analyze.py              # tables from logs
 python analysis/make_figures.py         # figures from logs
 ```

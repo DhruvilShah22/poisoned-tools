@@ -58,7 +58,8 @@
 
 <h1>Poisoned Tools: Prompt-Injection Robustness and Failure Anatomy of Small
 Open-Weight Tool Agents</h1>
-<p class="authors">Dhruvil Shah &nbsp;·&nbsp; Independent research &nbsp;·&nbsp; July 2026</p>
+<p class="authors">Dhruvil Amit Shah &nbsp;·&nbsp; Independent research &nbsp;·&nbsp; July 2026</p>
+<p class="authors" style="font-size:0.85em">Code and data: https://github.com/DhruvilShah22/poisoned-tools &nbsp;·&nbsp; License: CC BY 4.0<br>Cite as: D. A. Shah, &ldquo;Poisoned Tools: Prompt-Injection Robustness and Failure Anatomy of Small Open-Weight Tool Agents,&rdquo; Zenodo, 2026, doi:10.5281/zenodo.21349713.</p>
 
 <div class="abstract">
 <p><strong>Abstract.</strong> Small open-weight language models in the
@@ -329,8 +330,8 @@ be exploited. The compliance anatomy (Figure&nbsp;4) makes the split
 visible&mdash;capable models tend to comply blindly, small models to ignore the
 attack or derail into loops&mdash;and where an attack does land it is overwhelmingly
 blind compliance: the agent obeys with no sign it noticed the instruction was
-foreign. Cases where a model flags the injection and then complies anyway are
-rare.</p>
+foreign. Not one episode in the matrix flags the injection and then complies
+anyway.</p>
 
 <figure>
 <img src="figures/fig5_compliance.png" alt="Compliance anatomy by model">
@@ -433,7 +434,7 @@ the grader is rule-based and can still err on unusual phrasings.</p>
 find that small open-weight tool agents are induced to obey planted instructions
 most easily through error strings, more readily as they grow larger, and not
 meaningfully less under any cheap training-free defense we tried&mdash;one of which
-halves small-model utility for no significant safety gain. The three comfortable
+drives both Llama models' benign utility to zero for no significant safety gain. The three comfortable
 intuitions we started with (guard the corpus, bigger is safer, a reminder can only
 help) are each wrong in this setting. The testbed, the data, and the full logs are
 public and rerun in under four GPU-hours at no cost, and we hope the negative
@@ -442,8 +443,7 @@ would have been.</p>
 
 <h2>Reproducibility statement</h2>
 <p>Every table and figure regenerates from the committed raw logs: regenerate the
-deterministic world, run the four grader gates and the reference-label comparison,
-then re-derive the tables and figures. Model digests are pinned in the run manifest;
+deterministic world, run the four grader gates, then re-derive the tables and figures. Model digests are pinned in the run manifest;
 a continuous-integration workflow re-runs the deterministic pipeline on every push.
 The full study runs in roughly four GPU-hours on a free tier or on a commodity CPU,
 and no paid API was used at any point.</p>
@@ -479,7 +479,7 @@ arXiv:2403.14720.</p>
 Injection.</p>
 <p>Perez, F., &amp; Ribeiro, I. (2022). Ignore Previous Prompt: Attack Techniques for
 Language Models. arXiv:2211.09527.</p>
-<p>Shah, D. (2026). Quantization, Not Just Scale: Reliability and Failure Anatomy of
+<p>Shah, D. A. (2026). Quantization, Not Just Scale: Reliability and Failure Anatomy of
 Small Open-Weight Tool Agents. (Author's prior work.)</p>
 <p>Wallace, E., Xiao, K., Leike, R., Weng, L., Heidecke, J., &amp; Beutel, A. (2024).
 The Instruction Hierarchy: Training LLMs to Prioritize Privileged Instructions.

@@ -24,9 +24,9 @@
 
 \title{\bfseries Poisoned Tools: Prompt-Injection Robustness and Failure
 Anatomy of Small Open-Weight Tool Agents}
-\author{Dhruvil Shah}
+\author{Dhruvil Amit Shah}
 \affil{\normalsize Independent research}
-\date{July 2026}
+\date{July 2026\\[2pt] \small Code and data: \url{https://github.com/DhruvilShah22/poisoned-tools}\\ License: Creative Commons Attribution 4.0 International (CC BY 4.0)\\ Cite as: D. A. Shah, ``Poisoned Tools: Prompt-Injection Robustness and Failure Anatomy of Small Open-Weight Tool Agents,'' Zenodo, 2026, doi:10.5281/zenodo.21349713.}
 
 \begin{document}
 \maketitle
@@ -329,8 +329,8 @@ the chance to be exploited. The compliance anatomy (Figure~\ref{fig:compliance})
 makes the split visible---capable models tend to comply blindly, small models to
 ignore the attack or derail into loops---and where an attack does land it is
 overwhelmingly \emph{blind} compliance: the agent obeys with no sign it noticed the
-instruction was foreign. Cases where a model flags the injection and then complies
-anyway are rare.
+instruction was foreign. Not one episode in the matrix
+flags the injection and then complies anyway.
 
 \begin{figure}[t]\centering
 \includegraphics[width=0.85\linewidth]{figures/fig5_compliance.png}
@@ -446,7 +446,7 @@ Holding quantization fixed and varying only the injection and the defense, we fi
 that small open-weight tool agents are induced to obey planted instructions most
 easily through error strings, more readily as they grow larger, and not
 meaningfully less under any cheap training-free defense we tried---one of which
-halves small-model utility for no significant safety gain. The three comfortable
+drives both Llama models' benign utility to zero for no significant safety gain. The three comfortable
 intuitions we started with (guard the corpus, bigger is safer, a reminder can only
 help) are each wrong in this setting. The testbed, the data, and the full logs are
 public and rerun in under four GPU-hours at no cost, and we hope the negative
@@ -456,8 +456,7 @@ would have been.
 \section*{Reproducibility statement}
 
 Every table and figure regenerates from the committed raw logs: regenerate the
-deterministic world, run the four grader gates and the reference-label comparison,
-then re-derive the tables and figures. Model digests are pinned in the run
+deterministic world, run the four grader gates, then re-derive the tables and figures. Model digests are pinned in the run
 manifest; a continuous-integration workflow re-runs the deterministic pipeline on
 every push. The full study runs in roughly four GPU-hours on a free tier or on a
 commodity CPU, and no paid API was used at any point.
@@ -504,7 +503,7 @@ Applications --- LLM01: Prompt Injection}.
 \emph{Ignore Previous Prompt: Attack Techniques for Language Models}.
 arXiv:2211.09527.
 
-\bibitem[Shah(2026)]{shah2026} Shah, D. (2026). \emph{Quantization, Not Just Scale:
+\bibitem[Shah(2026)]{shah2026} Shah, D. A. (2026). \emph{Quantization, Not Just Scale:
 Reliability and Failure Anatomy of Small Open-Weight Tool Agents}. (Author's prior
 work.)
 
